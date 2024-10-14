@@ -20,7 +20,7 @@ def get_current_page_name():
 def make_sidebar():
   with st.sidebar:
     if st.session_state.get("logged_in", False):
-      st.header(f'📄{constant.TITLE_MAIN}')
+      st.header(f':page_with_curl: {constant.TITLE_MAIN}')
       st.page_link("pages/analyse.py", label=constant.TITLE_ANALYSE,
                    icon=":material/rebase:")
       st.page_link("pages/about_us.py", label=constant.TITLE_ABOUT_US,
