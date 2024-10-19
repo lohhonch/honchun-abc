@@ -66,6 +66,7 @@ def main():
   try:
     if MODE_DEBUG:
       st.write(st.session_state)
+      st.write(f"DATABASE_RECREATE={DATABASE_RECREATE}")
 
     if "menu_option" not in st.session_state or st.session_state.menu_option == TITLE_HOME:
       st.title(f":page_with_curl: {TITLE_DEFAULT}")
