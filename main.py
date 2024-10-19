@@ -6,6 +6,8 @@ import streamlit as st
 import streamlit_antd_components as sac
 
 from helper.authentication import prompt_login
+from helper.database import create_db, fetch_one
+from helper.repository import repository_uploader
 from helper.utility import get_secret_value
 
 
@@ -27,20 +29,25 @@ class ConfigHandler:
 # Initialising config.ini
 config_handler = ConfigHandler()
 MODE_DEBUG = config_handler.get_value("mode", "MODE_DEBUG")
+AUTHOR = config_handler.get_value("author", "AUTHOR")
 TITLE_DEFAULT = config_handler.get_value("title", "TITLE_DEFAULT")
 TITLE_HOME = config_handler.get_value("title", "TITLE_HOME")
+TITLE_REPOSITORY = config_handler.get_value("title", "TITLE_REPOSITORY")
+TITLE_REPOSITORY_SETUP = config_handler.get_value("title", "TITLE_REPOSITORY_SETUP")
+TITLE_REPOSITORY_MANAGE = config_handler.get_value("title", "TITLE_REPOSITORY_MANAGE")
 TITLE_ANALYSE = config_handler.get_value("title", "TITLE_ANALYSE")
 TITLE_ABOUT_US = config_handler.get_value("title", "TITLE_ABOUT_US")
 TITLE_METHODOLOGY = config_handler.get_value("title", "TITLE_METHODOLOGY")
 TITLE_DISCLAIMER = config_handler.get_value("title", "TITLE_DISCLAIMER")
 TITLE_SIGN_OUT = config_handler.get_value("title", "TITLE_SIGN_OUT")
 CONTENT_ABOUT_US = config_handler.get_value("content", "CONTENT_ABOUT_US")
-CONTENT_METHODOLOGY = config_handler.get_value(
-  "content", "CONTENT_METHODOLOGY")
+CONTENT_METHODOLOGY = config_handler.get_value("content", "CONTENT_METHODOLOGY")
 CONTENT_DISCLAIMER = config_handler.get_value("content", "CONTENT_DISCLAIMER")
 
 # Initialising .env / secrets
 PASSWORD_TO_ENTER = get_secret_value("PASSWORD_TO_ENTER")
+DATABASE_RECREATE = (get_secret_value("DATABASE_RECREATE") == "1")
+DATABASE_NAME = get_secret_value("DATABASE_NAME")
 MAX_NUMBER_OF_FILES = get_secret_value("MAX_NUMBER_OF_FILES")
 
 # Streamlit configuration
@@ -65,8 +72,10 @@ def main():
     else:
       st.title(f"{st.session_state.menu_option}")
 
+    create_db()
+
     if not st.session_state.get("logged_in", False):
-      if prompt_login(CONTENT_DISCLAIMER):
+      if prompt_login(AUTHOR, CONTENT_DISCLAIMER):
         st.success("Logged in successfully!")
         sleep(0.5)
         st.rerun()
@@ -75,14 +84,9 @@ def main():
       with st.sidebar:
         st.session_state.menu_option = sac.menu([
             sac.MenuItem(TITLE_HOME, icon='house'),
-            sac.MenuItem('products', icon='box-fill', children=[
-                sac.MenuItem('apple', icon='apple'),
-                sac.MenuItem('other', icon='git', description='other items', children=[
-                    sac.MenuItem('google', icon='google',
-                                 description='item description'),
-                    sac.MenuItem('gitlab', icon='gitlab'),
-                    sac.MenuItem('wechat', icon='wechat'),
-                  ]),
+            sac.MenuItem(TITLE_REPOSITORY, icon='database', children=[
+                sac.MenuItem(TITLE_REPOSITORY_SETUP, icon='folder-plus'),
+                sac.MenuItem(TITLE_REPOSITORY_MANAGE, icon='folder2-open')
               ]),
             sac.MenuItem(type='divider'),
             sac.MenuItem(TITLE_ABOUT_US, icon='info-circle'),
@@ -91,10 +95,20 @@ def main():
             sac.MenuItem(TITLE_SIGN_OUT, icon='box-arrow-right'),
           ], open_all=True, key="key_sidebar")
 
+        sac.divider(label=AUTHOR, icon=sac.BsIcon(name='person', size=20), variant='dotted')
+
+        data = fetch_one("SELECT creation_date FROM Configuration WHERE key=?", ['setup_on'])
+        if data:
+          sac.tags([sac.Tag(label=f'since=={data[0]}')], align='start', color='green')
+
       if st.session_state.menu_option == TITLE_HOME:
         pass
       elif st.session_state.menu_option == TITLE_ABOUT_US:
         st.markdown(CONTENT_ABOUT_US)
+      elif st.session_state.menu_option == TITLE_REPOSITORY_SETUP:
+        repository_uploader(MAX_NUMBER_OF_FILES)
+      elif st.session_state.menu_option == TITLE_REPOSITORY_MANAGE:
+        pass
       elif st.session_state.menu_option == TITLE_METHODOLOGY:
         st.write(CONTENT_METHODOLOGY)
       elif st.session_state.menu_option == TITLE_DISCLAIMER:

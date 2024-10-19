@@ -1,11 +1,12 @@
 import hmac
 
 import streamlit as st
+import streamlit_antd_components as sac
 
 from helper.utility import get_secret_value
 
 
-def prompt_login(disclaimer):
+def prompt_login(author, disclaimer):
   """Returns `True` if user had entered the correct password"""
 
   def password_entered():
@@ -20,8 +21,7 @@ def prompt_login(disclaimer):
   if st.session_state.get("logged_in", False):
     return True
 
-  st.info("1. You are required to read and agree to the following *Disclaimer*.",
-          icon=":material/check_circle:")
+  st.info("1. You are required to read and agree to the following *Disclaimer*.", icon=":material/check_circle:")
 
   expander = st.expander("DISCLAIMER", icon="🔔")
   expander.write(disclaimer)
@@ -36,5 +36,7 @@ def prompt_login(disclaimer):
                   on_change=password_entered, key="password_to_enter")
     if "logged_in" in st.session_state and not st.session_state["logged_in"]:
       st.error("😕 Password incorrect")
+
+  sac.divider(label=author, icon=sac.BsIcon(name='person', size=20), variant='dotted')
 
   return False
