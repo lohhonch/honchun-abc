@@ -44,7 +44,7 @@ CONTENT_METHODOLOGY = config_handler.get_value("content", "CONTENT_METHODOLOGY")
 CONTENT_DISCLAIMER = config_handler.get_value("content", "CONTENT_DISCLAIMER")
 
 # Initialising .env / secrets
-MODE_DEBUG = (get_secret_value("MODE_DEBUG") == 1)
+MODE_DEBUG = (int(get_secret_value("MODE_DEBUG")) == 1)
 PASSWORD_TO_ENTER = get_secret_value("PASSWORD_TO_ENTER")
 DATABASE_NAME = get_secret_value("DATABASE_NAME")
 MAX_NUMBER_OF_FILES = get_secret_value("MAX_NUMBER_OF_FILES")
