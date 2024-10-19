@@ -4,15 +4,11 @@ import sqlite3
 from helper.utility import get_secret_value
 
 DATABASE_FOLDER = os.path.join(os.getcwd(), "database")
-DATABASE_RECREATE = (get_secret_value("DATABASE_RECREATE") == "1")
 DATABASE_NAME = get_secret_value("DATABASE_NAME")
 DATABASE_PATH = os.path.join(DATABASE_FOLDER, DATABASE_NAME)
 
 if not os.path.exists(DATABASE_FOLDER):
   os.makedirs(DATABASE_FOLDER)
-
-if DATABASE_RECREATE and os.path.exists(DATABASE_PATH):
-  os.remove(DATABASE_PATH)
 
 
 # Get connection

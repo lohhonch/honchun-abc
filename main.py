@@ -28,7 +28,6 @@ class ConfigHandler:
 
 # Initialising config.ini
 config_handler = ConfigHandler()
-MODE_DEBUG = config_handler.get_value("mode", "MODE_DEBUG")
 AUTHOR = config_handler.get_value("author", "AUTHOR")
 TITLE_DEFAULT = config_handler.get_value("title", "TITLE_DEFAULT")
 TITLE_HOME = config_handler.get_value("title", "TITLE_HOME")
@@ -45,8 +44,8 @@ CONTENT_METHODOLOGY = config_handler.get_value("content", "CONTENT_METHODOLOGY")
 CONTENT_DISCLAIMER = config_handler.get_value("content", "CONTENT_DISCLAIMER")
 
 # Initialising .env / secrets
+MODE_DEBUG = (get_secret_value("MODE_DEBUG") == "1")
 PASSWORD_TO_ENTER = get_secret_value("PASSWORD_TO_ENTER")
-DATABASE_RECREATE = (get_secret_value("DATABASE_RECREATE") == "1")
 DATABASE_NAME = get_secret_value("DATABASE_NAME")
 MAX_NUMBER_OF_FILES = get_secret_value("MAX_NUMBER_OF_FILES")
 
@@ -66,7 +65,6 @@ def main():
   try:
     if MODE_DEBUG:
       st.write(st.session_state)
-      st.write(f"DATABASE_RECREATE={DATABASE_RECREATE}")
 
     if "menu_option" not in st.session_state or st.session_state.menu_option == TITLE_HOME:
       st.title(f":page_with_curl: {TITLE_DEFAULT}")
