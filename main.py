@@ -1,5 +1,6 @@
 import ast
 import configparser
+from datetime import datetime
 from time import sleep
 
 import streamlit as st
@@ -97,10 +98,12 @@ def main():
 
         sac.divider(label=APPLICATION_AUTHOR, icon=sac.BsIcon(name='person', size=20), variant='dotted')
 
-        data = fetch_one("SELECT creation_date FROM Configuration WHERE key=?", ['setup_on'])
+        data = fetch_one(
+          "SELECT creation_date AS formatted_date FROM Configuration WHERE key=?", ['setup_on'])
         if data:
+          since_date_str = datetime.strptime(data[0], '%Y-%m-%d %H:%M:%S').strftime('%d %b %Y, %I:%M %p')
           sac.tags([
-            sac.Tag(label=f'since=={data[0]}'),
+            sac.Tag(label=f'since=={since_date_str}'),
             sac.Tag(label=f'version=={APPLICATION_VERSION}')
           ], align='start', color='green')
 
