@@ -28,7 +28,8 @@ class ConfigHandler:
 
 # Initialising config.ini
 config_handler = ConfigHandler()
-AUTHOR = config_handler.get_value("author", "AUTHOR")
+APPLICATION_VERSION = config_handler.get_value("application", "APPLICATION_VERSION")
+APPLICATION_AUTHOR = config_handler.get_value("application", "APPLICATION_AUTHOR")
 TITLE_DEFAULT = config_handler.get_value("title", "TITLE_DEFAULT")
 TITLE_HOME = config_handler.get_value("title", "TITLE_HOME")
 TITLE_REPOSITORY = config_handler.get_value("title", "TITLE_REPOSITORY")
@@ -73,10 +74,11 @@ def main():
     create_db()
 
     if not st.session_state.get("logged_in", False):
-      if prompt_login(AUTHOR, CONTENT_DISCLAIMER):
+      if prompt_login(APPLICATION_AUTHOR, CONTENT_DISCLAIMER):
         st.success("Logged in successfully!")
         sleep(0.5)
         st.rerun()
+      sac.tags([sac.Tag(label=f'version=={APPLICATION_VERSION}')], align='start', color='green')
     else:
       # Make side bar; More icons at https://icons.getbootstrap.com/
       with st.sidebar:
@@ -93,11 +95,14 @@ def main():
             sac.MenuItem(TITLE_SIGN_OUT, icon='box-arrow-right'),
           ], open_all=True, key="key_sidebar")
 
-        sac.divider(label=AUTHOR, icon=sac.BsIcon(name='person', size=20), variant='dotted')
+        sac.divider(label=APPLICATION_AUTHOR, icon=sac.BsIcon(name='person', size=20), variant='dotted')
 
         data = fetch_one("SELECT creation_date FROM Configuration WHERE key=?", ['setup_on'])
         if data:
-          sac.tags([sac.Tag(label=f'since=={data[0]}')], align='start', color='green')
+          sac.tags([
+            sac.Tag(label=f'since=={data[0]}'),
+            sac.Tag(label=f'version=={APPLICATION_VERSION}')
+          ], align='start', color='green')
 
       if st.session_state.menu_option == TITLE_HOME:
         pass

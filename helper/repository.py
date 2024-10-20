@@ -25,28 +25,31 @@ def repository_manage():
                     SELECT t1.name, t1.creation_date, t1.repository_id
                     FROM Repository t1
                     ORDER BY t1.creation_date DESC""")
-  df = pd.DataFrame(data).set_axis(["name", "creation_date", "repository_id"], axis="columns")
-  df["select"] = False
+  if data:
+    df = pd.DataFrame(data).set_axis(["name", "creation_date", "repository_id"], axis="columns")
+    df["select"] = False
 
-  st.data_editor(
-    df,
-    column_config={
-      "name": st.column_config.Column("Name", width="medium", required=True),
-      "creation_date": st.column_config.DatetimeColumn("Creation Date", width="medium", format="D MMM YYYY, h:mm a", required=True),
-      "select": st.column_config.CheckboxColumn(label="Option", help="Select to view _files_ or to delete _repository_"),
-      "repository_id": None,
-    },
-    disabled=["name", "creation_date", "repository_id"],
-    hide_index=True,
-    num_rows="fixed",
-    on_change=show_repository_option,
-    args=[",".join(df['repository_id'].to_list())],
-    key="key_repository_manage_data"
-  )
+    st.data_editor(
+      df,
+      column_config={
+        "name": st.column_config.Column("Name", width="medium", required=True),
+        "creation_date": st.column_config.DatetimeColumn("Creation Date", width="medium", format="D MMM YYYY, h:mm a", required=True),
+        "select": st.column_config.CheckboxColumn(label="Option", help="Select to view _files_ or to delete _repository_"),
+        "repository_id": None,
+      },
+      disabled=["name", "creation_date", "repository_id"],
+      hide_index=True,
+      num_rows="fixed",
+      on_change=show_repository_option,
+      args=[",".join(df['repository_id'].to_list())],
+      key="key_repository_manage_data"
+    )
 
-  if "show_repository_option_placeholder" not in st.session_state:
-    placeholder = st.empty()
-    st.session_state['show_repository_option_placeholder'] = placeholder
+    if "show_repository_option_placeholder" not in st.session_state:
+      placeholder = st.empty()
+      st.session_state['show_repository_option_placeholder'] = placeholder
+  else:
+    st.write("EMPTY")
 
   # End of repository_manage()
 
