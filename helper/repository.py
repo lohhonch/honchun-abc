@@ -1,8 +1,54 @@
 import uuid
+
+import pandas as pd
 import streamlit as st
 import streamlit_antd_components as sac
 
+from helper.database import execute_non_query, fetch_all
+
 REPOSITORY_NAME_LENGTH = 100
+
+
+def repository_manage():
+  def show_repository_option(repository_ids):
+    placeholder = st.session_state.show_repository_option_placeholder
+    with placeholder.container():
+      lst_repository_ids = repository_ids.split(",")
+      edited_rows = st.session_state.key_repository_manage_data["edited_rows"]
+      for row in edited_rows:
+        row_id = row
+        is_selected = edited_rows[row_id]["select"]
+        if is_selected:
+          st.write(f'{lst_repository_ids[row_id]} is selected')
+
+  data = fetch_all("""
+                    SELECT t1.name, t1.creation_date, t1.repository_id
+                    FROM Repository t1
+                    ORDER BY t1.creation_date DESC""")
+  df = pd.DataFrame(data).set_axis(["name", "creation_date", "repository_id"], axis="columns")
+  df["select"] = False
+
+  st.data_editor(
+    df,
+    column_config={
+      "name": st.column_config.Column("Name", width="medium", required=True),
+      "creation_date": st.column_config.DatetimeColumn("Creation Date", width="medium", format="D MMM YYYY, h:mm a", required=True),
+      "select": st.column_config.CheckboxColumn(label="Option", help="Select to view _files_ or to delete _repository_"),
+      "repository_id": None,
+    },
+    disabled=["name", "creation_date", "repository_id"],
+    hide_index=True,
+    num_rows="fixed",
+    on_change=show_repository_option,
+    args=[",".join(df['repository_id'].to_list())],
+    key="key_repository_manage_data"
+  )
+
+  if "show_repository_option_placeholder" not in st.session_state:
+    placeholder = st.empty()
+    st.session_state['show_repository_option_placeholder'] = placeholder
+
+  # End of repository_manage()
 
 
 def save_repository_to_db(unique_id, uploaded_files, repository_name):
@@ -11,9 +57,22 @@ def save_repository_to_db(unique_id, uploaded_files, repository_name):
     sac.alert(label="Oops", description="Something went wrong", color="error", banner=False, icon=True, closable=True)
     return False
 
-  # Logic to save
+  # Repository - Save to database
+  execute_non_query("INSERT INTO Repository (repository_id, name) VALUES (?, ?)", [unique_id, repository_name])
+  # Files - Save to database
+  for uploaded_file in uploaded_files:
+    file_name = uploaded_file.name
+    type = uploaded_file.type
+    size = uploaded_file.size
+    file_content = uploaded_file.read()
+    st.write((file_name, type, size, len(file_content)))
+    execute_non_query(
+      "INSERT INTO Files (repository_id, file_name, type, size, data) \
+      VALUES (?, ?, ?, ?, ?)", [unique_id, file_name, type, size, file_content])
 
   return True
+
+  # End of save_repository_to_db()
 
 
 def repository_uploader(max_files):

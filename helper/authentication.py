@@ -32,7 +32,7 @@ def prompt_login(author, disclaimer):
     st.info("2. Key in *Password* to continue.", icon="🔑")
 
     # Show input for password
-    st.text_input("Password", type="password", label_visibility="collapsed",
+    st.text_input("Password", type="password", placeholder="Enter Password", label_visibility="collapsed",
                   on_change=password_entered, key="password_to_enter")
     if "logged_in" in st.session_state and not st.session_state["logged_in"]:
       st.error("😕 Password incorrect")

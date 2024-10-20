@@ -7,7 +7,7 @@ import streamlit_antd_components as sac
 
 from helper.authentication import prompt_login
 from helper.database import create_db, fetch_one
-from helper.repository import repository_uploader
+from helper.repository import repository_manage, repository_uploader
 from helper.utility import get_secret_value
 
 
@@ -61,7 +61,6 @@ st.set_page_config(
 
 
 def main():
-
   try:
     if MODE_DEBUG:
       st.write(st.session_state)
@@ -107,7 +106,7 @@ def main():
       elif st.session_state.menu_option == TITLE_REPOSITORY_SETUP:
         repository_uploader(MAX_NUMBER_OF_FILES)
       elif st.session_state.menu_option == TITLE_REPOSITORY_MANAGE:
-        pass
+        repository_manage()
       elif st.session_state.menu_option == TITLE_METHODOLOGY:
         st.write(CONTENT_METHODOLOGY)
       elif st.session_state.menu_option == TITLE_DISCLAIMER:
@@ -127,4 +126,5 @@ def main():
 
 # Current py is run as the main program
 if __name__ == "__main__":
+  # os.environ.pop("MODE_DEBUG")
   main()

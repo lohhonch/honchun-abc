@@ -17,6 +17,22 @@ def get_connection():
   return conn
 
 
+# Execute Non Query
+def execute_non_query(query, parameters=None):
+  conn = get_connection()
+
+  with conn:
+    cursor = conn.cursor()
+    if parameters is None:
+      cursor.execute(query)
+    else:
+      cursor.execute(query, parameters)
+
+    last_id = cursor.lastrowid
+
+  return last_id
+
+
 # Fetch one
 def fetch_one(query, parameters=None):
   conn = get_connection()
@@ -84,6 +100,8 @@ def create_db():
             file_id INTEGER PRIMARY KEY AUTOINCREMENT,
             repository_id TEXT NOT NULL,
             file_name TEXT NOT NULL,
+            type TEXT NOT NULL,
+            size INTEGER NOT NULL,
             data BLOB NOT NULL,
             FOREIGN KEY (repository_id) REFERENCES Repository(repository_id)
         )
