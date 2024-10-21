@@ -10,16 +10,43 @@ REPOSITORY_NAME_LENGTH = 100
 
 
 def repository_manage():
-  def show_repository_option(repository_ids):
+  def show_repository_detail(repository_ids, names):
+    def handle_delete_form():
+      if "key_selected_repositories" in st.session_state and "key_confirm_delete" in st.session_state:
+        if st.session_state.key_selected_repositories and st.session_state.key_confirm_delete:
+          for item in st.session_state.key_selected_repositories:
+            repository_id_to_delete = item.split("[")[1][:-1].strip()
+            execute_non_query("DELETE FROM Files WHERE repository_id = ?", [repository_id_to_delete])
+            execute_non_query("DELETE FROM Repository WHERE repository_id = ?", [repository_id_to_delete])
+      # End of handle_delete_form()
+
+    if "show_repository_option_placeholder" not in st.session_state:
+      return
+
     placeholder = st.session_state.show_repository_option_placeholder
     with placeholder.container():
-      lst_repository_ids = repository_ids.split(",")
+      repository_selected = []
+      lst_repository_ids = repository_ids.split("~")
+      lst_names = names.split("~")
       edited_rows = st.session_state.key_repository_manage_data["edited_rows"]
       for row in edited_rows:
         row_id = row
         is_selected = edited_rows[row_id]["select"]
         if is_selected:
-          st.write(f'{lst_repository_ids[row_id]} is selected')
+          repository_selected.append(f"{lst_names[row_id]} [ {lst_repository_ids[row_id]} ]")
+
+      if repository_selected:
+        with st.form("delete_form"):
+          st.subheader("Delete Repository")
+          st.multiselect("Select repositories to delete:", options=repository_selected, key="key_selected_repositories")
+          st.checkbox("I understand that this action cannot be undone. Associated files will also be removed.",
+                      value=False, key="key_confirm_delete")
+
+          st.form_submit_button("Delete", help="Ensure form fully filled before clicking", on_click=handle_delete_form)
+      else:
+        return
+
+    # End of show_repository_detail()
 
   data = fetch_all("""
                     SELECT t1.name, t1.creation_date, t1.repository_id
@@ -44,8 +71,8 @@ def repository_manage():
     disabled=["name", "creation_date", "repository_id"],
     hide_index=True,
     num_rows="fixed",
-    on_change=show_repository_option,
-    args=[",".join(df['repository_id'].to_list())],
+    on_change=show_repository_detail,
+    args=["~".join(df['repository_id'].to_list()), "~".join(df['name'].to_list())],
     key="key_repository_manage_data"
   )
 
@@ -114,7 +141,7 @@ def repository_uploader(max_files):
 
   if st.session_state.get("save_repository_to_db", False):
     # Show Success acknowledgement screen
-    sac.result(label="Setting Up New Repository", description=f"unique id: {unique_id}", status="success")
+    sac.result(label="Set Up New Repository", description=f"unique id: {unique_id}", status="success")
     del st.session_state["save_repository_to_db"]
 
   # End of repository_uploader()
