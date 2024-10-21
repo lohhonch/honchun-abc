@@ -103,7 +103,7 @@ def create_db():
             type TEXT NOT NULL,
             size INTEGER NOT NULL,
             data BLOB NOT NULL,
-            FOREIGN KEY (repository_id) REFERENCES Repository(repository_id)
+            FOREIGN KEY (repository_id) REFERENCES Repository(repository_id) ON DELETE CASCADE
         )
     """)
 
